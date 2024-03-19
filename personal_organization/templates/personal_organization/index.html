@@ -1,0 +1,96 @@
+{% extends "personal_organization/layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}
+    <style>
+        .dashboard{
+            background-color: #f8f9fa;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .dashboard:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+        .item{
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        a, a:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+    <h2 style="text-align: center; margin-top: 20px;">My Dashboard</h2>
+    <div>
+        <a href="{% url 'notes' %}">
+            <div class="dashboard">
+                <h3>Starred Notes</h3>
+                {% for note in starred_notes %}
+                    <div class="item">{{ note.title }}</div>
+                {% empty %}
+                    <div class="item">No notes</div>
+                {% endfor %}
+            </div>
+        </a>
+        
+        <a href="{% url 'notes' %}">
+            <div class="dashboard">
+                <h3>Last created notes</h3>
+                {% for note in latest_notes %}
+                    <div class="item">{{ note.title }}</div>
+                {% empty %}
+                    <div class="item">No notes</div>
+                {% endfor %}
+            </div>
+        </a>
+        <a href="{% url 'notes' %}">
+            <div class="dashboard">
+                <h3>Last shared with me notes</h3>
+                {% for note in latest_shared_notes %}
+                    <div class="item">{{ note.title }}</div>
+                {% empty %}
+                <div class="item">No notes</div>
+                {% endfor %}
+            </div>
+        </a>
+        
+        <a href="{% url 'tasks' %}">
+            <div class="dashboard">
+                <h3>Tasks due in the next 10 days</h3>
+                {% for task in upcoming_tasks %}
+                    <div class="item">{{ task.title }} - {{ task.deadline }}</div>
+                {% empty %}
+                    <div class="item">No tasks</div>
+                {% endfor %}
+            </div>
+        </a>
+        
+        <a href="{% url 'calendar' %}">
+            <div class="dashboard">
+                <h3>Events in the next 30 days</h3>
+                {% for event in upcoming_events %}
+                    <div class="item">{{ event.title }} - {{ event.date }}</div>
+                {% empty %}
+                    <div class="item">No Events</div>
+                {% endfor %}
+            </div>
+        </a>
+        
+    {% else %}
+        <p style="text-align: center;font-size: larger; margin-top: 30px;">Please log in to access the site's content</p>
+    {% endif %}
+    </div>
+{% endblock %}

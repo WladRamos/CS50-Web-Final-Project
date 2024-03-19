@@ -1,0 +1,385 @@
+{% extends "personal_organization/layout.html" %}
+{% load static %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block styles%}
+    <style>
+        .board {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            width: 60%;
+            margin-bottom: 20px;
+            border: 2px solid #ccc;
+        }
+
+        .board:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+        .collaborator-box{
+            background-color: #f8f9fa;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .collaborator-box:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .col {
+            border-right: 1px solid #ccc;
+            border-top: 1px solid #ccc;
+            padding-right: 15px;
+        }
+
+        .col:last-child {
+            border-right: none;
+        }
+
+        .card {
+            margin-bottom: 15px;
+            max-width: 335px;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+        .invite-button, .invite-submit-button ,.add-task-button, .cancel-button, .edit-card, .update-status-card, .status-button, .collaborators-button, .submit-btn{
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .invite-button:hover, .edit-button:hover, .update-status-card:hover, .edit-card:hover, .add-task-button:hover, .status-button:hover, .collaborators-button:hover, .submit-btn:hover{
+            background-color: #e0e0e0;
+        }
+        .delete-button,.delete-card{
+            background-color: red;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .delete-button:hover, .delete-card:hover{
+            background-color: rgb(231, 5, 5);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    
+    <div class="container-fluid" style="margin-top: 20px;">
+        <div class="container text-center">
+            <div class="board-section">
+                <h2>My Board</h2>
+                {% for board, cards in created_boards_with_cards.items %}
+                    <div class="row">
+                        <div class="board col" data-board-id="{{ board.id }}">
+                            <div class="buttons" style="float: right; display: block;">
+                                <button class="collaborators-button" style="margin-left: 5px;">collaborators</button>
+                                <button class="add-task-button" style="margin-left: 5px;">Add Task</button>
+                                <button class="invite-button" style="margin-left: 5px;">invite</button>
+                            </div>
+                            <h3 class="board-title" style="margin-bottom: 20px; text-align: left;">{{ board.title }}</h3>
+                            <div class="row board-content" style="display: flex;">
+                                <div class="col">
+                                    <h4>To Do</h4>
+                                    {% for card in cards %}
+                                        {% if card.status == 'to_do' %}
+                                        <div class="card" data-card-id="{{ card.id }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ card.title }}</h5>
+                                                <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                                {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                                {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                                <div class="card-buttons">
+                                                    <button class="delete-card">
+                                                        &#128465;
+                                                    </button>
+                                                    <button class="edit-card">
+                                                        &#9998;
+                                                    </button>
+                                                    <button class="update-status-card">
+                                                        &#8644;
+                                                    </button>
+                                                    <span class="current-status" data-status="{{ card.status }}"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="col">
+                                    <h4>In Progress</h4>
+                                    {% for card in cards %}
+                                        {% if card.status == 'in_progress' %}
+                                        <div class="card" data-card-id="{{ card.id }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ card.title }}</h5>
+                                                <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                                {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                                {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                                <div class="card-buttons">
+                                                    <button class="delete-card">
+                                                        &#128465;
+                                                    </button>
+                                                    <button class="edit-card">
+                                                        &#9998;
+                                                    </button>
+                                                    <button class="update-status-card">
+                                                        &#8644;
+                                                    </button>
+                                                    <span class="current-status" data-status="{{ card.status }}"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="col">
+                                    <h4>Done</h4>
+                                    {% for card in cards %}
+                                        {% if card.status == 'done' %}
+                                        <div class="card" data-card-id="{{ card.id }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ card.title }}</h5>
+                                                <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                                {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                                {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                                <div class="card-buttons">
+                                                    <button class="delete-card">
+                                                        &#128465;
+                                                    </button>
+                                                    <button class="edit-card">
+                                                        &#9998;
+                                                    </button>
+                                                    <button class="update-status-card">
+                                                        &#8644;
+                                                    </button>
+                                                    <span class="current-status" data-status="{{ card.status }}"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <h5 style="color: grey; opacity: 0.5; text-align: center; margin-top: 30px;">No boards...</h5>
+                {% endfor %}
+            </div>
+            
+            <div class="board-section">
+                <h2 style="margin-top: 30px;">Shared With Me</h2>
+                {% for board, cards in collaborated_boards_with_cards.items %}
+                <div class="row">
+                    <div class="board col" data-board-id="{{ board.id }}">
+                        <div class="buttons" style="float: right; display: block;">
+                            <button class="delete-button" style="margin-left: 5px;">Quit Board</button>
+                            <button class="add-task-button" style="margin-left: 5px;">Add Task</button>
+                            <button class="invite-button" style="margin-left: 5px;">invite</button>
+                        </div>
+                        <h3 class="board-title" style="margin-bottom: 20px; text-align: left;">{{ board.title }}</h3>
+                        <div class="row board-content" style="display: flex;">
+                            <div class="col">
+                                <h4>To Do</h4>
+                                {% for card in cards %}
+                                    {% if card.status == 'to_do' %}
+                                    <div class="card" data-card-id="{{ card.id }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ card.title }}</h5>
+                                            <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                            {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                            {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                            <div class="card-buttons">
+                                                <button class="delete-card">
+                                                    &#128465;
+                                                </button>
+                                                <button class="edit-card">
+                                                    &#9998;
+                                                </button>
+                                                <button class="update-status-card">
+                                                    &#8644;
+                                                </button>
+                                                <span class="current-status" data-status="{{ card.status }}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="col">
+                                <h4>In Progress</h4>
+                                {% for card in cards %}
+                                    {% if card.status == 'in_progress' %}
+                                    <div class="card" data-card-id="{{ card.id }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ card.title }}</h5>
+                                            <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                            {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                            {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                            <div class="card-buttons">
+                                                <button class="delete-card">
+                                                    &#128465;
+                                                </button>
+                                                <button class="edit-card">
+                                                    &#9998;
+                                                </button>
+                                                <button class="update-status-card">
+                                                    &#8644;
+                                                </button>
+                                                <span class="current-status" data-status="{{ card.status }}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="col">
+                                <h4>Done</h4>
+                                {% for card in cards %}
+                                    {% if card.status == 'done' %}
+                                    <div class="card" data-card-id="{{ card.id }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ card.title }}</h5>
+                                            <p class="card-text" style="display: none;" style="display: none;">{{ card.content }}</p>
+                                            {% if card.assigned_to %}<span class="card-assigned_to">Assigned to: {{ card.assigned_to }}</span> <br>{% else %} <span>No user assigned</span> <br> {% endif %}
+                                            {% if card.deadline %}<span class="card-deadline">Deadline: {{ card.deadline }}</span>{% else %} <span>No deadline set</span>{% endif %}
+                                            <div class="card-buttons">
+                                                <button class="delete-card">
+                                                    &#128465;
+                                                </button>
+                                                <button class="edit-card">
+                                                    &#9998;
+                                                </button>
+                                                <button class="update-status-card">
+                                                    &#8644;
+                                                </button>
+                                                <span class="current-status" data-status="{{ card.status }}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                    <h5 style="color: grey; opacity: 0.5; text-align: center; margin-top: 30px;">No shared boards...</h5>
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="inviteForm">
+                <input type="email" id="email" name="email" placeholder="Collaborator's Email" required>
+                <button type="submit" class="invite-submit-button">Invite</button>
+            </form>
+        </div>
+    </div>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="deleteForm">
+                <label>Are You Sure?</label><br>
+                <button class="cancel-button">Cancel</button>
+                <button type="submit" class="delete-button">Delete</button>
+            </form>
+        </div>
+    </div>
+    <div id="addTask" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="addtaskForm">
+                <div class="form-group">
+                    <label for="newTitle">Title:</label>
+                    <input type="text" class="form-control" name="newTitle" id="newTitle" placeholder="Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="newcontent">Description:</label>
+                    <input type="text" class="form-control" name="newcontent" id="newcontent" placeholder="Describe the task" required>
+                </div>
+                <div class="form-group">
+                    <label for="newDeadline">Deadline (optional):</label>
+                    <input type="date" class="form-control" name="newDeadline" id="newDeadline">
+                </div>
+                <div class="form-group">
+                    <label for="newAssigned_to">Assigned to (username) (optional):</label>
+                    <input type="text" class="form-control" name="newAssigned_to" id="newAssigned_to" placeholder="Assigned to">
+                </div>
+                <button type="submit" class="submit-btn">Add Task</button>
+            </form>
+        </div>
+    </div>
+    <div id="editTask" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="editTaskForm">
+                <div class="form-group">
+                    <label for="newTitle">Title:</label>
+                    <input type="text" class="form-control" name="editTitle" id="editTitle" placeholder="Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="newcontent">Description:</label>
+                    <input type="text" class="form-control" name="editcontent" id="editcontent" placeholder="Describe the task" required>
+                </div>
+                <div class="form-group">
+                    <label for="newDeadline">Deadline (optional):</label>
+                    <input type="date" class="form-control" name="editDeadline" id="editDeadline">
+                </div>
+                <div class="form-group">
+                    <label for="newAssigned_to">Assigned to (username) (optional):</label>
+                    <input type="text" class="form-control" name="editAssigned_to" id="editAssigned_to" placeholder="Assigned to">
+                </div>
+                <button type="submit" class="submit-btn">Save changes</button>
+            </form>
+        </div>
+    </div>
+    <div id="changeStatusModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="statusForm" style="text-align: center;">
+                <label>Choose new status</label><br>
+                <div class="row">
+                    <div class="col"><button class="status-button" id="toDoButton" data-status="to_do">To Do</button></div>
+                    <div class="col"><button class="status-button" id="inProgressButton" data-status="in_progress">In Progress</button></div>
+                    <div class="col"><button class="status-button" id="doneButton" data-status="done">Done</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="collaboratorsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="collaboratorsList" style="text-align: center;">
+                <label>Collaborators:</label><br>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    {% for board, cards in created_boards_with_cards.items %}
+                        {% for collaborator in board.collaborators.all %}
+                            <div class="collaborator-box" data-collaborator-id="{{ collaborator.id }}" data-board-id="{{ board.id }}" style="margin-bottom: 20px;">
+                                {{ collaborator.username }}
+                                <button class="remove-collaborator-button" style="background-color: transparent; border: none; cursor: pointer;">X</button>
+                            </div>
+                        {% empty %}
+                            <div>No Collaborators</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script%}
+    <script src="{% static 'personal_organization/tasks.js' %}"></script>
+    <script src="{% static 'personal_organization/taskCards.js' %}"></script>
+{% endblock %}

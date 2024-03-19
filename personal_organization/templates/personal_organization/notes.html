@@ -1,0 +1,176 @@
+{% extends "personal_organization/layout.html" %}
+{% load static %}
+
+{% block title %}Notes{% endblock %}
+
+{% block styles %}
+    <style>
+        .custom-card, .custom-card-CreateNote {
+            border: 2px solid #ccc;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .custom-card:hover, .custom-card-CreateNote:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h3{
+            text-align: center;
+        }
+        .gold-star{
+            color: gold;
+        }
+        .black-star{
+            color: black;
+        }
+        .invite-button, .invite-submit-button ,.cancel-button, .edit-button, .save-edit, .cancel-edit, .create-note-button{
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .invite-button:hover, .edit-button:hover, .save-edit:hover,.invite-submit-button:hover, .cancel-button:hover, .cancel-edit:hover, .create-note-button:hover{
+            background-color: #e0e0e0;
+        }
+        .delete-button{
+            background-color: red;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .delete-button:hover{
+            background-color: rgb(231, 5, 5);
+        }
+        .note-title{
+            font-size: larger;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid" style="margin-top: 20px;">
+        <div class="container my-3 custom-card-CreateNote">
+            <div class="row">
+                <div class="col-12">
+                    <h3>Create Note</h3>
+                    <form id="create-note-form">
+                        <div class="form-group">
+                            <label for="title">Title:</label>
+                            <input type="text" class="form-control" id="title" placeholder="Enter title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Content:</label>
+                            <textarea class="form-control" id="content" rows="5" placeholder="Enter content" required></textarea>
+                        </div>
+                        <button type="submit" class="create-note-button">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="margin-top: 20px;">
+        <h3>My Notes</h3>
+        {% for note in user_notes %}
+            <div class="container my-3 custom-card" data-note-id="{{ note.id }}">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card-details">
+                            {% if request.user in note.star.all %}
+                            <span class="star gold-star">&#9734;</span>
+                            {% else %}
+                            <span class="star black-star">&#9734;</span>
+                            {% endif %}
+                            <button class="invite-button" style="float: right;margin-left: 5px;">invite</button>
+                            <button class="edit-button" style="float: right; margin-left: 5px;">Edit</button>
+                            <button class="delete-button" style="float: right; margin-left: 5px;">Delete</button>
+                            <strong class="note-title"> {{ note.title }} </strong> -
+                            <span class="note-owner">{{ note.owner }}</span> - <span>{{ note.created_at }}</span>
+                            
+                            <div class="content" style="display: none;">
+                                <hr>
+                                <pre class="note-content">{{ note.content }}</pre>
+                            </div>
+                        </div>                        
+                        <div class="edit-form" style="display: none;">
+                            <label for="edit-title">Title:</label>
+                            <input id="edit-title" class="edit-title form-control" type="text" value="{{ note.title }}" required>
+                            <label for="edit-content">Content:</label>
+                            <textarea id="edit-content" class="edit-content form-control" required>{{ note.content }}</textarea>
+                            <button class="save-edit" style="margin-top: 10px;">Save</button>
+                            <button class="cancel-edit" style="margin-top: 10px;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <h5 style="color: grey; opacity: 0.5; text-align: center; margin-top: 30px;">No notes...</h5>
+        {% endfor %}
+    </div>
+    <div class="container-fluid" style="margin-top: 20px;">
+        <h3>Shared With me</h3>
+        {% for note in collaborated_notes %}
+            <div class="container my-3 custom-card" data-note-id="{{ note.id }}">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card-details">
+                            {% if request.user in note.star.all %}
+                            <span class="star gold-star">&#9734;</span>
+                            {% else %}
+                            <span class="star black-star">&#9734;</span>
+                            {% endif %}
+                            <button class="invite-button" style="float: right;margin-left: 5px;">invite</button>
+                            <button class="edit-button" style="float: right; margin-left: 5px;">Edit</button>
+                            <button class="delete-button" style="float: right; margin-left: 5px;">Quit Note</button>
+                            <strong class="note-title"> {{ note.title }} </strong> -
+                            <span class="note-owner">{{ note.owner }}</span> - <span>{{ note.created_at }}</span>
+                            
+                            <div class="content" style="display: none;">
+                                <hr>
+                                <pre class="note-content">{{ note.content }}</pre>
+                            </div>
+                        </div>                        
+                        <div class="edit-form" style="display: none;">
+                            <label for="edit-title">Title:</label>
+                            <input id="edit-title" class="edit-title form-control" type="text" value="{{ note.title }}" required>
+                            <label for="edit-content">Content:</label>
+                            <textarea id="edit-content" class="edit-content form-control" required>{{ note.content }}</textarea>
+                            <button class="save-edit" style="margin-top: 10px;">Save</button>
+                            <button class="cancel-edit" style="margin-top: 10px;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <h5 style="color: grey; opacity: 0.5; text-align: center; margin-top: 30px;">No shared notes...</h5>
+        {% endfor %}
+    </div>
+
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="inviteForm">
+                <input type="email" id="email" name="email" placeholder="Collaborator's Email" required>
+                <button type="submit" class="invite-submit-button">Invite</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="deleteForm">
+                <label>Are You Sure?</label><br>
+                <button class="cancel-button">Cancel</button>
+                <button class="delete-button" id="delete-note-modal">Delete</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script%}
+    <script src="{% static 'personal_organization/notes.js' %}"></script>
+{% endblock %}

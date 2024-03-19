@@ -1,0 +1,208 @@
+{% extends "personal_organization/layout.html" %}
+{% load static %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block styles %}
+    <style>
+        .calendar {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+        .calendar:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .weekdays {
+            display: flex;
+            justify-content: space-between;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .weekdays li {
+            width: calc(100% / 7);
+            text-align: center;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            padding: 0;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        .days li {
+            list-style: none;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            min-height: 69px;
+        }
+        .event-bar {
+            background-color: #a19b9b;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        #prev-btn, #next-btn{
+            border-radius: 5px;
+            border: 2px solid #ccc;
+        }
+
+        .event-list {
+            background-color: #f8f9fa;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .event-list:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-item {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .task-warning{
+            color: grey; 
+            opacity: 0.5;
+        }
+        .event-title{
+            font-weight: bold;
+            font-size: large;
+        }
+        .edit-event-btn, .cancel-button, #new-event-btn, .save-changes-button{
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .edit-event-btn:hover, .cancel-button:hover, #new-event-btn:hover, .save-changes-button:hover{
+            background-color: #e0e0e0;
+        }
+        .delete-event-btn, .delete-button{
+            background-color: red;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .delete-event-btn:hover, .delete-button:hover{
+            background-color: rgb(231, 5, 5);
+        }
+        .button-box{
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h2 style="text-align: center; margin-top: 20px;">My Calendar</h2>
+    <div class="button-box">
+        <button style="width: 150px; height: 50px;" id="new-event-btn">New Event</button>
+    </div>
+    <div class="calendar" data-events="{{ events_json }}">
+        <div class="calendar-header">
+            <button id="prev-btn">&lt;</button>
+            <span id="month-name">Month</span>
+            <button id="next-btn">&gt;</button>
+        </div>
+        <ul class="weekdays">
+            <li>Sun</li>
+            <li>Mon</li>
+            <li>Tue</li>
+            <li>Wed</li>
+            <li>Thu</li>
+            <li>Fri</li>
+            <li>Sat</li>
+        </ul>
+        <ul id="days-container" class="days">
+        </ul>
+    </div>
+    <div class="event-list" style="text-align: center;">
+        <h2>Event List</h2>
+        <div id="event-list">
+        </div>
+    </div>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="deleteForm">
+                <label>Are You Sure?</label><br>
+                <button class="cancel-button">Cancel</button>
+                <button class="delete-button" id="delete-event-modal">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div id="editEvent" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="editTaskForm">
+                <div class="form-group">
+                    <label for="newTitle">Title:</label>
+                    <input type="text" class="form-control" name="editEventTitle" id="editEventTitle" placeholder="Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="newcontent">Description:</label>
+                    <input type="text" class="form-control" name="editEventContent" id="editEventContent" placeholder="Describe the event (optional)">
+                </div>
+                <div class="form-group">
+                    <label for="newDeadline">Date:</label>
+                    <input type="date" class="form-control" name="editEventDate" id="editEventDate" required>
+                </div>
+                <button id="edit-event-modal" class="save-changes-button">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <div id="newEvent" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="newTaskForm">
+                <div class="form-group">
+                    <label for="newTitle">Title:</label>
+                    <input type="text" class="form-control" name="newEventTitle" id="newEventTitle" placeholder="Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="newcontent">Description:</label>
+                    <input type="text" class="form-control" name="newEventContent" id="newEventContent" placeholder="Describe the event (optional)">
+                </div>
+                <div class="form-group">
+                    <label for="newDeadline">Date:</label>
+                    <input type="date" class="form-control" name="newEventDate" id="newEventDate" required>
+                </div>
+                <button id="new-event-modal" class="save-changes-button">Add Event</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script%}
+<script src="{% static 'personal_organization/calendar.js' %}"></script>
+{% endblock %}

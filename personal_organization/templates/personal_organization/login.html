@@ -1,0 +1,42 @@
+{% extends "personal_organization/layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+    <style>
+        
+        .login-btn{
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .login-btn:hover{
+            background-color: #e0e0e0;
+        }
+
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <h2>Login</h2>
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <input class="login-btn" type="submit" value="Login">
+    </form>
+
+    Don't have an account? <a href="{% url 'register' %}">Register here.</a>
+
+{% endblock %}

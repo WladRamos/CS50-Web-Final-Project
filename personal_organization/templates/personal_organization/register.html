@@ -1,0 +1,48 @@
+{% extends "personal_organization/layout.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block styles %}
+    <style>
+        
+        .register-btn{
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: solid black 1px;
+        }
+        .register-btn:hover{
+            background-color: #e0e0e0;
+        }
+
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <h2>Register</h2>
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <form action="{% url 'register' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" autofocus type="text" name="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="email" name="email" placeholder="Email Address">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
+        </div>
+        <input class="register-btn" type="submit" value="Register">
+    </form>
+
+    Already have an account? <a href="{% url 'login' %}">Log In here.</a>
+
+{% endblock %}
